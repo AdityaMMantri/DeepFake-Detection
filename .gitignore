@@ -1,0 +1,28 @@
+# datasets
+data/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.webp
+
+# models
+*.pth
+*.pt
+
+# outputs
+outputs/
+checkpoints/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# env
+venv/
+.env
+
+# logs
+*.log
