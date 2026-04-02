@@ -1,8 +1,3 @@
-"""
-Utility functions for 9-Channel ViT Deepfake Detection.
-Includes EarlyStopping, checkpoint management, logging, and reproducibility.
-"""
-
 import os
 import random
 import logging

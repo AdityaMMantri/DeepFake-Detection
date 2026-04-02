@@ -1,9 +1,3 @@
-"""
-9-Channel Dataset for Deepfake Detection.
-Loads RGB face images and generates FFT + Noise modalities on-the-fly.
-Concatenates into a [9, 224, 224] tensor.
-"""
-
 import os
 import cv2
 import numpy as np

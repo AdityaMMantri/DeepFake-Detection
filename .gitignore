@@ -26,3 +26,5 @@ venv/
 
 # logs
 *.log
+
+hf_models/

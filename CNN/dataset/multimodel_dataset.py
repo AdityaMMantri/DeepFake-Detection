@@ -26,7 +26,6 @@ class DeepfakeDataset(Dataset):
         self.labels = labels
         self.train = train
 
-        # augmentation applied only during training
         self.augment = transforms.Compose([
             transforms.ToPILImage(),
             transforms.RandomHorizontalFlip(),
@@ -42,7 +41,6 @@ class DeepfakeDataset(Dataset):
             )
         ])
 
-        # RGB transform (ConvNeXt pretrained normalization)
         self.rgb_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(
@@ -51,7 +49,6 @@ class DeepfakeDataset(Dataset):
             )
         ])
 
-        # FFT transform (no ImageNet normalization)
         self.fft_transform = transforms.Compose([
             transforms.ToTensor()
         ])
@@ -76,16 +73,14 @@ class DeepfakeDataset(Dataset):
 
         # Apply augmentation only during training
         if self.train:
-            img_pil = self.augment(img)           # returns PIL image
-            img_np  = np.array(img_pil)           # back to numpy RGB (H, W, 3)
+            img_pil = self.augment(img)           
+            img_np  = np.array(img_pil)           
         else:
-            img_np = img                          # already numpy RGB
+            img_np = img                          
 
         # Compute FFT from the SAME (possibly augmented) image
-        fft_img = compute_fft(img_np)             # expects RGB numpy, returns RGB numpy
+        fft_img = compute_fft(img_np)             
 
-        # Apply transforms
-        # rgb_transform accepts PIL or uint8 numpy in RGB order
         rgb = self.rgb_transform(img_np)
         fft = self.fft_transform(fft_img)
 

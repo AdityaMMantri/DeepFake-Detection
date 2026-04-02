@@ -14,7 +14,6 @@ class Config:
     batch_size: int = 32
     num_workers: int = 4
     
-    # YOUR PATHS - UPDATED
     BASE = "F:/SEM-6/DL/DEEP-FAKE/DL-Project/data"
     train_real_dir: str = f"{BASE}/train/real"
     train_fake_dir: str = f"{BASE}/train/fake"

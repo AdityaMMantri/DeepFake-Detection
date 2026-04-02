@@ -1,17 +1,8 @@
-"""
-Augmentation pipelines with stronger regularization.
-"""
-
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from typing import List, Optional
 
-
-def get_train_transforms(
-    image_size: int = 224,
-    mean: Optional[List[float]] = None,
-    std: Optional[List[float]] = None
-) -> A.Compose:
+def get_train_transforms(image_size: int = 224,mean: Optional[List[float]] = None,std: Optional[List[float]] = None) -> A.Compose:
     """Training augmentation pipeline."""
     if mean is None:
         mean = [0.485, 0.456, 0.406]
@@ -54,11 +45,7 @@ def get_train_transforms(
     ])
 
 
-def get_val_transforms(
-    image_size: int = 224,
-    mean: Optional[List[float]] = None,
-    std: Optional[List[float]] = None
-) -> A.Compose:
+def get_val_transforms(image_size: int = 224,mean: Optional[List[float]] = None,std: Optional[List[float]] = None) -> A.Compose:
     """Validation/inference transform."""
     if mean is None:
         mean = [0.485, 0.456, 0.406]

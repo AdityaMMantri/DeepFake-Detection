@@ -1,9 +1,6 @@
 import sys
 import os
 
-# =========================
-# FIX IMPORT PATH
-# =========================
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 
@@ -20,9 +17,6 @@ from models.vit_model import build_model
 from utils.utils import load_checkpoint
 
 
-# =========================
-# EVALUATION LOOP
-# =========================
 def evaluate(model, loader, device):
     model.eval()
 
@@ -44,9 +38,6 @@ def evaluate(model, loader, device):
     return np.array(all_preds), np.array(all_labels)
 
 
-# =========================
-# CONFUSION MATRIX
-# =========================
 def plot_confusion_matrix(cm, save_path):
     plt.figure(figsize=(6, 5))
     plt.imshow(cm, interpolation="nearest")
@@ -76,20 +67,13 @@ def plot_confusion_matrix(cm, save_path):
     plt.close()
 
 
-# =========================
-# MAIN
-# =========================
 def main():
 
     device = config.DEVICE
     print(f"Using device: {device}")
 
-    # =========================
-    # Load Model
-    # =========================
     model = build_model()
 
-    # 🔥 FIXED PATH (robust)
     checkpoint_path = os.path.join(
         ROOT, "outputs", "checkpoints", "best_model.pth"
     )
@@ -101,21 +85,11 @@ def main():
     model.eval()
 
     print("✔ Model loaded")
-
-    # =========================
-    # Load Test Data
-    # =========================
     dataloaders = get_dataloaders()
     test_loader = dataloaders["test"]
 
-    # =========================
-    # Evaluate
-    # =========================
     preds, labels = evaluate(model, test_loader, device)
 
-    # =========================
-    # Metrics
-    # =========================
     acc = accuracy_score(labels, preds)
     precision = precision_score(labels, preds, zero_division=0)
     recall = recall_score(labels, preds, zero_division=0)
@@ -126,10 +100,6 @@ def main():
     print(f"Precision : {precision:.4f}")
     print(f"Recall    : {recall:.4f}")
     print(f"F1 Score  : {f1:.4f}")
-
-    # =========================
-    # Confusion Matrix
-    # =========================
     cm = confusion_matrix(labels, preds)
 
     results_dir = os.path.join(ROOT, "outputs", "results")
@@ -140,17 +110,11 @@ def main():
 
     print(f"\n✔ Confusion matrix saved at: {cm_path}")
 
-    # =========================
-    # Save Predictions
-    # =========================
     np.save(os.path.join(results_dir, "preds.npy"), preds)
     np.save(os.path.join(results_dir, "labels.npy"), labels)
 
     print("✔ Predictions saved")
 
 
-# =========================
-# ENTRY
-# =========================
 if __name__ == "__main__":
     main()

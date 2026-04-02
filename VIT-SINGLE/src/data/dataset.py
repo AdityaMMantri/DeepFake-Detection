@@ -54,9 +54,9 @@ class DeepfakeDataset(Dataset):
         
         # Check if directories exist
         if not real_path.exists():
-            raise RuntimeError(f"❌ Real directory not found: {real_dir}")
+            raise RuntimeError(f"Real directory not found: {real_dir}")
         if not fake_path.exists():
-            raise RuntimeError(f"❌ Fake directory not found: {fake_dir}")
+            raise RuntimeError(f"Fake directory not found: {fake_dir}")
         
         # Real images (label 0)
         real_count = 0
@@ -74,7 +74,7 @@ class DeepfakeDataset(Dataset):
                 
         if len(samples) == 0:
             raise RuntimeError(
-                f"❌ No images found in:\n"
+                f"No images found in:\n"
                 f"   Real: {real_dir}\n"
                 f"   Fake: {fake_dir}\n"
                 f"   Supported extensions: {VALID_EXTENSIONS}"

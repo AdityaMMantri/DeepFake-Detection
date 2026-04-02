@@ -1,8 +1,3 @@
-"""
-Trainer for RGBViTBranch - SAVES EVERY EPOCH!
-ALL ERRORS FIXED - Compatible with PyTorch 2.5.1
-"""
-
 from __future__ import annotations
 
 import logging
@@ -44,24 +39,22 @@ class ViTTrainer:
     def __init__(self, cfg: Config):
         self.cfg = cfg
         
-        # Force GPU if available
         if torch.cuda.is_available() and cfg.device == "cuda":
             self.device = torch.device("cuda")
-            print(f"✅ Using GPU: {torch.cuda.get_device_name(0)}")
+            print(f"   Using GPU: {torch.cuda.get_device_name(0)}")
             print(f"   GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
         else:
             self.device = torch.device("cpu")
-            print("⚠️  Using CPU (training will be slow)")
+            print("  Using CPU (training will be slow)")
         
         logger.info(f"Using device: {self.device}")
         
         # ── Model ─────────────────────────────────────────────────────────────
         self.model = RGBViTBranch(cfg).to(self.device)
         
-        # Print model size
         total_params = sum(p.numel() for p in self.model.parameters())
         trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        print(f"📊 Model: {total_params:,} total parameters, {trainable_params:,} trainable")
+        print(f"Model: {total_params:,} total parameters, {trainable_params:,} trainable")
         
         # ── Loss ──────────────────────────────────────────────────────────────
         self.criterion = nn.BCEWithLogitsLoss()
@@ -95,7 +88,6 @@ class ViTTrainer:
             T_max=max(cfg.epochs - cfg.warmup_epochs, 1),
             eta_min=1e-6,
         )
-        # FIXED: Removed 'verbose' parameter which was causing error
         self.reduce_scheduler = ReduceLROnPlateau(
             self.optimizer, 
             mode='max', 
@@ -119,8 +111,8 @@ class ViTTrainer:
         # Create checkpoint directory
         self.checkpoint_dir = Path(cfg.checkpoint_dir)
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        print(f"📁 Checkpoints will be saved to: {self.checkpoint_dir.absolute()}")
-        print(f"   ✅ Models will be saved EVERY EPOCH as: epoch_001.pth, epoch_002.pth, etc.")
+        print(f" Checkpoints will be saved to: {self.checkpoint_dir.absolute()}")
+        print(f"    Models will be saved EVERY EPOCH as: epoch_001.pth, epoch_002.pth, etc.")
         
         # ── Auto-resume ───────────────────────────────────────────────────────
         if cfg.resume:
@@ -138,7 +130,7 @@ class ViTTrainer:
     def _build_dataloaders(self) -> tuple[DataLoader, DataLoader]:
         cfg = self.cfg
         
-        print(f"\n📂 Loading datasets...")
+        print(f"\nLoading datasets...")
         print(f"   Train real: {cfg.train_real_dir}")
         print(f"   Train fake: {cfg.train_fake_dir}")
         print(f"   Val real: {cfg.val_real_dir}")
@@ -179,7 +171,7 @@ class ViTTrainer:
             pin_memory=(self.device.type == "cuda"),
         )
         
-        print(f"\n📊 Dataset sizes:")
+        print(f"\nDataset sizes:")
         print(f"   Train: {len(train_dataset)} images ({len(train_loader)} batches)")
         print(f"   Val: {len(val_dataset)} images ({len(val_loader)} batches)")
         
@@ -308,7 +300,7 @@ class ViTTrainer:
             self.reduce_scheduler.step(val_acc)
             
     # ── Save checkpoint ───────────────────────────────────────────────────────
-    # SAVES EVERY EPOCH!
+
     
     def _save_checkpoint(
         self,
@@ -350,20 +342,20 @@ class ViTTrainer:
         if is_best_acc:
             best_acc_path = self.checkpoint_dir / "best_acc.pth"
             torch.save(checkpoint, best_acc_path)
-            logger.info(f"  ✅ BEST ACCURACY MODEL SAVED: {best_acc_path}")
+            logger.info(f"  BEST ACCURACY MODEL SAVED: {best_acc_path}")
             logger.info(f"     Accuracy: {val_metrics['acc']:.2%}")
         
         # 3. Save best AUC model
         if is_best_auc:
             best_auc_path = self.checkpoint_dir / "best_auc.pth"
             torch.save(checkpoint, best_auc_path)
-            logger.info(f"  ✅ BEST AUC MODEL SAVED: {best_auc_path}")
+            logger.info(f"   BEST AUC MODEL SAVED: {best_auc_path}")
             logger.info(f"     AUC: {val_metrics['auc']:.4f}")
         
-        # 4. ✅ SAVE EVERY EPOCH
+        # 4.  SAVE EVERY EPOCH
         epoch_path = self.checkpoint_dir / f"epoch_{epoch+1:03d}.pth"
         torch.save(checkpoint, epoch_path)
-        logger.info(f"  💾 SAVED EPOCH {epoch+1}: {epoch_path}")
+        logger.info(f"  SAVED EPOCH {epoch+1}: {epoch_path}")
         
         # 5. Save training history
         history_path = self.checkpoint_dir / "training_history.json"
@@ -465,19 +457,14 @@ class ViTTrainer:
         for epoch in range(self.start_epoch, self.cfg.epochs):
             t0 = time.time()
             
-            # Training
             train_metrics = self._train_one_epoch(train_loader, epoch)
             
-            # Validation
             val_metrics = self._validate(val_loader)
             
-            # Get current learning rate
             current_lr = self.optimizer.param_groups[0]['lr']
             
-            # Step scheduler
             self._step_scheduler(epoch, val_metrics["acc"])
             
-            # Check if best model
             is_best_acc = val_metrics["acc"] > self.best_val_acc
             is_best_auc = val_metrics["auc"] > self.best_val_auc
             
@@ -495,10 +482,8 @@ class ViTTrainer:
                 "val": val_metrics,
             })
             
-            # SAVE CHECKPOINT (EVERY EPOCH!)
             self._save_checkpoint(epoch, train_metrics, val_metrics, is_best_acc, is_best_auc)
             
-            # Print summary
             self._print_epoch_summary(
                 epoch, train_metrics, val_metrics, is_best_acc, is_best_auc, 
                 time.time() - t0, current_lr
@@ -510,7 +495,7 @@ class ViTTrainer:
                 break
                 
         print(f"\n{LINE}")
-        print(f"  ✅ TRAINING COMPLETE!")
+        print(f"   TRAINING COMPLETE!")
         print(f"  Best Validation Accuracy: {self.best_val_acc:.2%}")
         print(f"  Best model saved to: {self.checkpoint_dir / 'best_acc.pth'}")
         print(f"  All epochs saved as: epoch_XXX.pth")

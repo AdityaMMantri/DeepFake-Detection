@@ -63,26 +63,20 @@ class ForensicFeatureExtractor:
 
         image_tensor = image_tensor.to(device)
 
-        # Forward pass with feature extraction
         logits, internal_features = self.model(image_tensor, return_features=True)
 
         cls_token = internal_features["cls_token"]          # [1, 384]
         patch_embeddings = internal_features["patch_embeddings"]  # [1, 196, 384]
         attention_weights = internal_features["attention_weights"]  # list of [1, 6, N, N]
 
-        # Compute softmax probabilities
         probs = F.softmax(logits, dim=-1)  # [1, 2]
 
-        # === Feature 1: vit_fake_probability ===
         vit_fake_prob = probs[0, 1].item()
 
-        # === Feature 2: cls_token_norm ===
         cls_norm = torch.norm(cls_token, p=2, dim=-1).item()
 
-        # === Feature 3: attention_entropy ===
         attn_entropy = self._compute_attention_entropy(attention_weights)
 
-        # === Feature 4: patch_variance ===
         patch_var = self._compute_patch_variance(patch_embeddings)
 
         # === Features 5, 6, 7: modality attention weights ===

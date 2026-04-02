@@ -1,8 +1,3 @@
-"""
-Configuration for 9-Channel ViT Deepfake Detection + Agentic Reasoning Module.
-All hyperparameters and paths are defined here.
-"""
-
 import os
 import torch
 
@@ -10,7 +5,6 @@ import torch
 # PATHS — Update DATASET_ROOT to point to your dataset
 # ============================================================
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# go up 3 levels → DL-Project
 
 DATASET_ROOT = os.path.join(BASE_DIR, "data")
 

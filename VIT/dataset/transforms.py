@@ -33,13 +33,11 @@ def compute_fft(image_np):
     for c in range(3):
         channel = image_np[:, :, c].astype(np.float32)
 
-        # Compute 2D FFT
         f_transform = np.fft.fft2(channel)
-        f_shift = np.fft.fftshift(f_transform)  # Center the zero-frequency
+        f_shift = np.fft.fftshift(f_transform)
 
-        # Magnitude spectrum (log scale for better visualization)
         magnitude = np.abs(f_shift)
-        magnitude = np.log1p(magnitude)  # log(1 + mag) to handle zeros
+        magnitude = np.log1p(magnitude)
 
         # Normalize to 0-255
         magnitude = (magnitude - magnitude.min()) / (magnitude.max() - magnitude.min() + 1e-8)
@@ -63,10 +61,8 @@ def compute_noise_residual(image_np, kernel_size=5):
         noise: numpy array of shape (H, W, 3), dtype uint8
                Noise residual map.
     """
-    # Apply Gaussian blur
     blurred = cv2.GaussianBlur(image_np, (kernel_size, kernel_size), 0)
 
-    # Compute residual (high-pass filter)
     noise = image_np.astype(np.float32) - blurred.astype(np.float32)
 
     # Normalize to 0-255 range
@@ -123,10 +119,8 @@ def build_9channel_tensor(image_np, transform, image_size=224):
     Returns:
         tensor_9ch: torch.Tensor of shape [9, image_size, image_size]
     """
-    # Resize the original image first (so all modalities have same spatial info)
     image_resized = cv2.resize(image_np, (image_size, image_size))
 
-    # Generate the 3 modalities
     rgb = image_resized.copy()
     fft = compute_fft(image_resized)
     noise = compute_noise_residual(image_resized)
