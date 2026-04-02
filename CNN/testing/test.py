@@ -3,9 +3,10 @@ import sys
 
 MODEL_NAME = "cnn"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "outputs", "results_CNN")
 
 import torch
 import numpy as np
@@ -16,9 +17,9 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from tqdm import tqdm
 
-from dataset.dataset_builder import build_dataset
-from dataset.multimodel_dataset import DeepfakeDataset
-from models.deepfake_model import DeepfakeModel
+from CNN.dataset.dataset_builder import build_dataset
+from CNN.dataset.multimodel_dataset import DeepfakeDataset
+from CNN.models.deepfake_model import DeepfakeModel
 
 
 def evaluate(model, loader, device):
@@ -70,9 +71,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # =========================
-    # Dataset (TEST ONLY)
-    # =========================
+
     test_paths, test_labels = build_dataset(os.path.join(DATA_DIR, "test"))
 
     test_dataset = DeepfakeDataset(
@@ -94,19 +93,15 @@ def main():
     # =========================
     model = DeepfakeModel(pretrained=False).to(device)
 
-    checkpoint_path = os.path.join(BASE_DIR, "..", "checkpoints", "cnn", "best_model.pth")
+    checkpoint_path = os.path.join(PROJECT_ROOT, "checkpoints", "cnn", "best_model.pth")
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
 
     print("✔ Loaded trained model")
 
-    # =========================
-    # Run Evaluation
-    # =========================
+
     preds, labels = evaluate(model, test_loader, device)
 
-    # =========================
-    # Metrics
-    # =========================
+
     acc = accuracy_score(labels, preds)
     precision = precision_score(labels, preds)
     recall = recall_score(labels, preds)
@@ -118,23 +113,16 @@ def main():
     print(f"Recall    : {recall:.4f}")
     print(f"F1 Score  : {f1:.4f}")
 
-    # =========================
-    # Confusion Matrix
-    # =========================
-    cm = confusion_matrix(labels, preds)
 
-    #os.makedirs("results", exist_ok=True)
-    cm_path = "results/confusion_matrix_human.png"
+    cm = confusion_matrix(labels, preds)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    cm_path = os.path.join(OUTPUT_DIR, "confusion_matrix.png")
 
     plot_confusion_matrix(cm, cm_path)
 
     print(f"\n✔ Confusion matrix saved at: {cm_path}")
-
-    # =========================
-    # Save raw predictions
-    # =========================
-    np.save("results/preds_human.npy", preds)
-    np.save("results/labels_human.npy", labels)
+    np.save(os.path.join(OUTPUT_DIR, "preds.npy"), preds)
+    np.save(os.path.join(OUTPUT_DIR, "labels.npy"), labels)
 
     print("✔ Predictions saved")
 

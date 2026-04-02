@@ -2,7 +2,8 @@ import os
 import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 #sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import torch
@@ -11,9 +12,9 @@ from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
 
-from dataset.dataset_builder import build_dataset
-from dataset.multimodel_dataset import DeepfakeDataset
-from models.deepfake_model import DeepfakeModel
+from CNN.dataset.dataset_builder import build_dataset
+from CNN.dataset.multimodel_dataset import DeepfakeDataset
+from CNN.models.deepfake_model import DeepfakeModel
 
 
 def train_epoch(model, loader, optimizer, criterion, device, epoch):
@@ -126,7 +127,7 @@ def main():
 
     epochs = 20
     best_acc = 0.0
-    os.makedirs("checkpoints", exist_ok=True)
+    os.makedirs(os.path.join(PROJECT_ROOT, "checkpoints"), exist_ok=True)
 
     for epoch in range(1, epochs + 1):
 
@@ -155,7 +156,7 @@ def main():
 
         if val_acc > best_acc:
             best_acc = val_acc
-            SAVE_DIR = os.path.join(BASE_DIR, "..", "checkpoints", "checkpoints_CNN")
+            SAVE_DIR = os.path.join(PROJECT_ROOT, "checkpoints", "cnn")
             os.makedirs(SAVE_DIR, exist_ok=True)
             torch.save(model.state_dict(), os.path.join(SAVE_DIR, "best_model.pth"))
             print(f"  ✔ Saved best model (val_acc={best_acc:.4f})")
