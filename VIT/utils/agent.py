@@ -10,7 +10,7 @@ A rule-based forensic investigator agent that:
 The agent is NOT trained — it uses expert-defined rules and thresholds.
 """
 
-from utils import config
+from VIT.utils import config
 
 
 class ForensicAgent:
