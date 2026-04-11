@@ -538,9 +538,3 @@ checkpoints/
 * Real-time inference
 
 ---
-
-## Author
-Aditya Mantri\
-Abeer Chourey\
-Janvi Jain\
-BTech AI & Data Science
